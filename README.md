@@ -1,44 +1,67 @@
-This repository contains my work for team Maverick in DSC at University of Texas at Dallas. All code contained in this repository is my own (excluding libraries). I plan to halt this project for a while (since team members have all quit due to lack of time) and might revisit it during the summer. I have now posted it on Github with public permissions so that others may benefit.
-
 # FashionTrends
-This project is an effort to predict fashion trends over time using machine learning. Currently, I am able to classify different types of clothing (Shirts, Skirts, Pants, Dress) using images webscraped from chictopia.com and training a model built using Keras.
 
-How could this project be useful? Being able to predict fashion trends would allow retailers to better their logistics for storage/shipping of clothes. Right now, retailers use sales along with results from fashion shows/blogs to determine what clothes would be useful for fashion. This project _could_ add a new dimension of analytics for such retailers (being able to use social media to predict demand possibly).
+This project focuses on predicting fashion trends over time using machine learning. The current implementation classifies different types of clothing (Shirts, Skirts, Pants, Dress) based on images collected from chictopia.com. The model is built using Keras and is trained on the web-scraped images.
 
-## How is this project set up
-Currently, this project is split into several files to make prototyping easier. Current workflow:
+### Purpose
+Predicting fashion trends can help retailers improve logistics for inventory and shipping. Retailers currently rely on sales data and fashion shows/blogs to anticipate trends. This project aims to add another layer of analytics by potentially predicting demand using machine learning models trained on images and social media data.
 
-`webscraper.py --> csvDownload.py --> preprocessing.py --> FashionTrends.py`
+### Current Status
+This project was developed as part of the Maverick team in DSC at the University of Texas at Dallas. While development is paused due to team members leaving, I plan to revisit the project during the summer. The code is available publicly on GitHub so others can benefit from it.
 
-`webscraper.py` webscrapes chictopia.com for images and tags. `csvDownload.py` actually downloads the scraped images which are fed into `preprocessing.py` to perform image preprocessing. Finally, `FashionTrends.py` is run to actually train the model.
+---
 
-## Details on how it works
-I use [BeautifulSoup](https://pypi.org/project/beautifulsoup4/) to parse webpages. Then, I download the images and start preprocessing.
+## Project Structure
+
+The project is divided into the following components:
+
+1. **`webscraper.py`**  
+   Scrapes images and tags from chictopia.com.
+
+2. **`csvDownload.py`**  
+   Downloads the images scraped by `webscraper.py`.
+
+3. **`preprocessing.py`**  
+   Preprocesses the downloaded images.
+
+4. **`FashionTrends.py`**  
+   Trains the machine learning model using preprocessed images.
+
+---
+
+## How It Works
+
+### Data Collection
+- Web scraping is done using [BeautifulSoup](https://pypi.org/project/beautifulsoup4/).
+- Images are downloaded and stored in a CSV format.
 
 ### Preprocessing
-If `preprocessing.py` started with this image:
+1. **Background Removal**  
+   Background is removed from the images using [DeepLabv3+](https://github.com/bonlime/keras-deeplab-v3-plus).
 
-![Original Image](/imgs/original.jpg "Original Image")
+2. **Resizing and Clustering**  
+   The images are resized, and K-means clustering (with 4 clusters) is applied using [Scikit-learn’s KMeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html).
 
-I remove the background (everything but humans) using [DeepLabv3+](https://github.com/bonlime/keras-deeplab-v3-plus).
+3. **Final Output**  
+   After preprocessing, a 2D NumPy array is saved for each image, with cluster values based on the clustering. This processed data is used for training.
 
-![Removed Background](/imgs/removed.jpg "Removed Background")
+---
 
-After removing the background, I then resize the image and perform k-means clustering using [KMeans from Scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html). Number of clusters currently is 4.
+### Model Training
+The model is a Convolutional Neural Network (CNN) with the following architecture:
+- 2 convolutional layers
+- 2 dropout layers
+- 1 softmax layer
+- Optimizer: Adadelta
 
-![Resized and Clustered](/imgs/128size.jpg "Resized and Clustered")
+The model is trained using the preprocessed images and their corresponding cluster arrays.
 
-Finally, I save the resized image along with a 2D NumPy array where each 2D location is the corresponding cluster value at that location based on cluster size and starting at 0 for largest cluster. This is then used for training.
+---
 
-### Training
-`FashionTrends.py` first creates a pandas dataset using the CSVs from `webscraping.py` and then constructs a 3D numpy array of the arrays created from `preprocessing.py`. After this, training occurs.
+### Future Improvements
+- **Dataset Expansion:** The current dataset is small (~1200 images). Expanding the dataset will improve the model’s performance.
+- **Generative Adversarial Networks (GANs):** Incorporating GANs could help enhance the classification results.
 
-My current model is a CNN with 2 convolutional layers and 2 dropout layers followed by a softmax layer. Optimizer is Adadelta. For specifics, look at (/FashionTrends/FashionTrends.py#L99).
+---
 
-Result after training:
-
-![Results](/imgs/result.jpeg "Results")
-
-These results are pretty good considering a small and potentially noisy dataset (~1200 images). For further improvements, I might use a GAN (Generational-Adversarial Network) which has been proven to do better for fashion classification and add more images to the dataset.
-
-**Disclaimer:** I am _not_ a professional (yet). For any other newbies who stumble upon this repository, don't treat these results as guarenteed good nor the methodology I used - there might be better alternatives I just don't have experience in yet.
+## Disclaimer
+This is an experimental project, and the results should not be taken as definitive. There may be better methods and techniques that I have yet to explore.
